@@ -1,0 +1,15 @@
+save_path: results
+cfm:
+  matching_type: AlphaTTarget
+  sigma: 0.1
+  alpha: 0.1
+  sampler_method: default
+hidden_sizes: [50, 50, 50]
+lr: 0.001
+epochs: 100
+batch_size: 64
+n_points: 
+n_points_val: 100000
+gaussian_points: 100
+n_delta: 4
+timesteps: 100
