@@ -5,6 +5,9 @@ import torch.nn as nn
 from torchcfm.conditional_flow_matching import ConditionalFlowMatcher, pad_t_like_x
 from torchcfm.optimal_transport import OTPlanSampler
 
+# import union
+from typing import Union
+
 
 class AlphaTConditionalFlowMatcher(ConditionalFlowMatcher):
     """

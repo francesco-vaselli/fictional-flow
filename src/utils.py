@@ -1,4 +1,6 @@
 import torch
+from torch import nn
+from torch.nn import functional as F
 import numpy as np
 import matplotlib.pyplot as plt
 from scipy.stats import norm
@@ -131,7 +133,6 @@ class MergedMLP(nn.Module):
         out_shape: int,
         context_features: int,
         hidden_sizes: list,
-        activation=F.relu,
         activate_output: bool = False,
         batch_norm: bool = False,
         dropout_probability: float = 0.0,
@@ -151,7 +152,7 @@ class MergedMLP(nn.Module):
             if batch_norm:
                 layers.append(nn.BatchNorm1d(size))
             layers.append(nn.Dropout(p=dropout_probability))
-            layers.append(activation)
+            layers.append(nn.ReLU())
             prev_size = size
 
         # Final layer
