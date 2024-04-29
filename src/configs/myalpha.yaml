@@ -1,15 +1,15 @@
-save_path: results
+save_path: alphat_base_bump
 cfm:
   matching_type: AlphaTTarget
-  sigma: 0.1
-  alpha: 0.1
+  sigma: 0.000001
+  alpha: 1
   sampler_method: default
-hidden_sizes: [50, 50, 50]
-lr: 0.001
-epochs: 100
-batch_size: 64
-n_points: 
-n_points_val: 100000
+hidden_sizes:  [32, 64, 128, 256, 512, 512, 256, 256, 128, 64, 32]
+lr: 1.e-5
+epochs: 200
+batch_size: 256
+n_points: 400000
+n_points_val: 1000000
 gaussian_points: 100
 n_delta: 4
 timesteps: 100

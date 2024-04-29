@@ -3,7 +3,7 @@ from torch import nn
 from torch.nn import functional as F
 import numpy as np
 import matplotlib.pyplot as plt
-from scipy.stats import norm
+from scipy.stats import norm, uniform
 
 
 def quantile_gaussian(n_points):
@@ -16,7 +16,7 @@ def quantile_gaussian(n_points):
     Returns:
     numpy.ndarray: The quantile points.
     """
-    return norm.ppf(np.linspace(0.01, 0.99, n_points))
+    return norm.ppf(np.linspace(0.02, 0.98, n_points))
 
 
 def build_dataset_delta(n_points, n_delta=4):
@@ -64,6 +64,24 @@ def build_dataset_delta(n_points, n_delta=4):
 
     return y
 
+def build_uniform_bump_dataset(n_points):
+    """ uniform distribution with spaced bumps rising in the middle """
+    
+    # each bump has 10% of the total points
+    remaining_points = int(n_points - 2*(0.1*n_points))
+    # bumps are located at 1/n_bumps, 3/n_bumps, 5/n_bumps, ...
+    # and have a width of 1/4*(1/n_bumps)
+    # x = np.linspace(0, 1, n_points)
+    y = np.random.uniform(0, 1, remaining_points)
+    bump1 = np.random.uniform(0.2, 0.4, int(0.1*n_points))
+    y = np.concatenate((y, bump1))
+    bump2 = np.random.uniform(0.6, 0.8, int(0.1*n_points))
+    y = np.concatenate((y, bump2))
+    
+    idx = np.random.permutation(len(y))
+    y = y[idx]
+    return torch.tensor(y).float()
+    
 
 def plot_trajectories_and_hist(traj, traj_small, n=100, every_n=1):
     """
@@ -173,3 +191,12 @@ class MergedMLP(nn.Module):
         if self.time_varying:  # and flow_time is not None:
             inputs = torch.cat((inputs, flow_time), dim=1)
         return self.network(inputs)
+
+if __name__=="__main__":
+    
+    y = build_uniform_bump_dataset(100000)
+    
+    fig = plt.figure(figsize=(6, 4))
+    plt.hist(y, bins=50, density=True)
+    fig.savefig("uniform_bump.png")
+    
