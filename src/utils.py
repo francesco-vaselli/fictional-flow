@@ -81,6 +81,16 @@ def build_uniform_bump_dataset(n_points):
     idx = np.random.permutation(len(y))
     y = y[idx]
     return torch.tensor(y).float()
+
+def build_zero_one_dataset(n_points):
+    """ a dataset with 0 from 0 to 0.25, 1 from 0.25 to 0.5, 0 from 0.5 to 0.75, 1 from 0.75 to 1 """
+    ranges = [0, 0.25, 0.5, 0.75]
+    y = np.random.uniform(ranges[0], ranges[1], int(0.5*n_points))
+    y = np.concatenate((y, np.random.uniform(ranges[2], ranges[3], int(0.5*n_points))))
+    
+    idx = np.random.permutation(len(y))
+    y = y[idx]
+    return torch.tensor(y).float()
     
 
 def plot_trajectories_and_hist(traj, traj_small, n=100, every_n=1):

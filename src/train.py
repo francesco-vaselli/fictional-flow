@@ -11,6 +11,7 @@ from utils import (
     quantile_gaussian,
     build_dataset_delta,
     build_uniform_bump_dataset,
+    build_zero_one_dataset,
     plot_trajectories_and_hist,
     MergedMLP,
 )
@@ -77,14 +78,16 @@ def train(config):
 
     # Generate the dataset
     # y = build_dataset_delta(n_points, n_delta=n_delta).to(device)
-    y = build_uniform_bump_dataset(n_points).to(device)
+    # y = build_uniform_bump_dataset(n_points).to(device)
+    y = build_zero_one_dataset(n_points).to(device)
     #plot histogram of y
     fig = plt.figure()
     plt.hist(y.cpu().numpy(), bins=100)
     fig.savefig(os.path.join(save_path, "histogram.png"))
     plt.close(fig)
     # y_val = build_dataset_delta(n_points_val, n_delta=n_delta).to(device)
-    y_val = build_uniform_bump_dataset(n_points_val).to(device)
+    # y_val = build_uniform_bump_dataset(n_points_val).to(device)
+    y_val = build_zero_one_dataset(n_points_val).to(device)
 
     criterion = torch.nn.MSELoss()
     optimizer = torch.optim.Adam(model.parameters(), lr=lr)
@@ -95,6 +98,9 @@ def train(config):
     # train
     losses = []
     for epoch in range(epochs):
+        # shuffle the dataset
+        perm = torch.randperm(len(y))
+        y = y[perm]
         loss_epoch = 0
         for i in range(0, len(y), batch_size):
             y_batch = y[i : i + batch_size].view(-1, 1)
@@ -127,16 +133,19 @@ def train(config):
         
             # sample and compute the wasserstein distance
             t = torch.linspace(0, 1, timesteps).to(device)
-            samples_list = []
-            for i in range(0, len(quantile_points), 10000):
-                samples = odeint(lambda t, x: model(inputs=x, flow_time= t.expand(x.shape[0], 1),), quantile_points.view(-1,1), t, method="euler").cpu().numpy()
-                samples_list.append(samples[-1,:])
+            # samples_list = []
+            # for i in range(0, len(quantile_points), 10000):
+            #     print(f"Sampling {i}/{len(quantile_points)}")
+            # make quantile points torch.randn
+            quantile_points = torch.randn(len(quantile_points), 1).to(device)
+            samples = odeint(lambda t, x: model(inputs=x, flow_time=t.expand(x.shape[0], 1)), quantile_points.view(-1,1), t, method="euler").cpu().numpy()
+            # samples_list.append(samples)
                 
-            samples = np.concatenate(samples_list, axis=0)
+            #samples = np.concatenate(samples_list, axis=0)
                 
             ws = wasserstein_distance(
                 y_val.squeeze().cpu().numpy(),
-                samples.squeeze(),
+                samples[-1,:].squeeze(),
             )
 
         losses.append((loss_epoch, val_loss, ws))
